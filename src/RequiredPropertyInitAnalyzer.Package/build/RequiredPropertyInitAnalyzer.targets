@@ -1,0 +1,24 @@
+﻿<Project>
+
+  <PropertyGroup>
+    <RequiredAttributePath Condition="'$(RequiredAttributePath)' == ''">$(MSBuildThisFileDirectory)RequiredAttribute(DefaultLanguageSourceExtension)</RequiredAttributePath>
+
+    <IncludeOwnershipAttributes Condition="'$(IncludeOwnershipAttributes)' == '' and Exists($(RequiredAttributePath))">true</IncludeOwnershipAttributes>
+  </PropertyGroup>
+
+  <ItemGroup Condition="'$(IncludeOwnershipAttributes)' == 'true' and Exists($(RequiredAttributePath))">
+    <Compile Include="$(RequiredAttributePath)" Visible="false" />
+
+    
+   <!--Workaround for https://github.com/dotnet/wpf/issues/810--> 
+    <_GeneratedCodeFiles Include="$(RequiredAttributePath)" Visible="false" Condition="'$(UseWPF)' == 'true'" />
+  </ItemGroup>
+
+  <Target Name="OwnershipAttributesRequestedForUnsupportedLanguage"
+          Condition="'$(IncludeOwnershipAttributes)' == 'true' and !Exists($(RequiredAttributePath))"
+          BeforeTargets="Compile">
+
+    <Warning Code="IDISP026" Text="The project specifies &lt;IncludeOwnershipAttributes&gt;true&lt;/IncludeOwnershipAttributes&gt;, but including attributes in this language is not yet supported." />
+  </Target>
+
+</Project>
