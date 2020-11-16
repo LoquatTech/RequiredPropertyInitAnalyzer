@@ -8,6 +8,8 @@ using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Diagnostics;
 
+using RequiredPropertyInitAnalyzer.Utils;
+
 namespace RequiredPropertyInitAnalyzer
 {
     [DiagnosticAnalyzer(LanguageNames.CSharp)]
@@ -55,13 +57,13 @@ namespace RequiredPropertyInitAnalyzer
             return propertySymbol.SetMethod?.IsInitOnly == true;
         }
 
-        private HashSet<string> GetRequiredProperties(ITypeSymbol initializationType, INamedTypeSymbol requiredType)
+        private static HashSet<string> GetRequiredProperties(ITypeSymbol initializationType, INamedTypeSymbol requiredType)
         {
             bool typeHasRequiredAttribute = RequiredAttributeUtils.TypeIsRequired(initializationType, requiredType);
 
             var requiredProperties = new HashSet<string>();
 
-            foreach (var propertySymbol in initializationType.GetMembers().OfType<IPropertySymbol>())
+            foreach (var propertySymbol in TypeSymbolUtils.GetProperties(initializationType))
             {
                 bool isRequired = typeHasRequiredAttribute
                                || RequiredAttributeUtils.PropertyIsRequired(
@@ -135,7 +137,7 @@ namespace RequiredPropertyInitAnalyzer
                 return;
             }
 
-            var requiredProperties = this.GetRequiredProperties(initializationType, requiredType);
+            var requiredProperties = GetRequiredProperties(initializationType, requiredType);
 
             var uninitializedProperties = GetUninitializedProperties(initializer, requiredProperties);
 

@@ -56,7 +56,7 @@ namespace RequiredPropertyInitTestSolution
         }
     }
 
-    internal class TestClassProperties
+    internal class TestClassProperties : TestBaseClassProperties
     {
         [RequiredInit]
         public int IntProp { get; init; }
@@ -71,6 +71,14 @@ namespace RequiredPropertyInitTestSolution
 
         [RequiredInit]
         public TestClassProperties RecursiveProp { get; init; }
+    }
+    internal abstract class TestBaseClassProperties
+    {
+        [RequiredInit]
+        public string StringProp { get; init; }
+
+        [RequiredInit]
+        public TestRecordProperties BaseRecordProp { get; init; }
     }
 
     internal record TestRecordProperties
