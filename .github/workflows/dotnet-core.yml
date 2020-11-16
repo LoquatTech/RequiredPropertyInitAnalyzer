@@ -1,7 +1,7 @@
 name: .NET Core
 
 env:
-  projectPath: '${{ GITHUB_WORKSPACE }}\src\RequiredPropertyInitAnalyzer.Package\'
+  projectPath: '${{ github.workspace }}\src\RequiredPropertyInitAnalyzer.Package\'
 
 on:
   push:
