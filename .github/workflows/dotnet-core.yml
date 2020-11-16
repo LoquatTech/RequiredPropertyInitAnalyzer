@@ -1,5 +1,8 @@
 name: .NET Core
 
+env:
+  projectPath: '${{ GITHUB_WORKSPACE }}\src\RequiredPropertyInitAnalyzer.Package\'
+
 on:
   push:
     branches: [ main, develop ]
@@ -17,9 +20,15 @@ jobs:
       uses: actions/setup-dotnet@v1
       with:
         dotnet-version: 5.0.100
+
     - name: Install dependencies
-      run: dotnet restore
+      run: dotnet restore ${{ env.projectPath }}
+
     - name: Build
-      run: dotnet build --configuration Release --no-restore
+      run: dotnet build ${{ env.projectPath }} --configuration Release --no-restore
+
+    - name: Pack
+      run: dotnet pack ${{ env.projectPath }} --no-restore --configuration Release -o .\package
+
     #- name: Test
     #  run: dotnet test --no-restore --verbosity normal
