@@ -36,14 +36,12 @@ namespace RequiredPropertyInitAnalyzer
             INamedTypeSymbol requiredType)
         {
             var sourceTree = diagnostic.Location.SourceTree;
-
             if (sourceTree is null)
             {
                 return;
             }
 
             var node = sourceTree.GetRoot(context.CancellationToken).FindNode(diagnostic.Location.SourceSpan);
-
 
             if (node is not PropertyDeclarationSyntax propertyDeclaration)
             {

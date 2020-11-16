@@ -44,20 +44,14 @@ namespace RequiredPropertyInitAnalyzer
 
         public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics => ImmutableArray.Create(Rule);
 
-        public override void Initialize(AnalysisContext context)
-        {
-            context.ConfigureGeneratedCodeAnalysis(GeneratedCodeAnalysisFlags.None);
-            context.EnableConcurrentExecution();
-
-            context.RegisterSyntaxNodeAction(this.AnalyzeSyntaxNode, SyntaxKind.ObjectInitializerExpression);
-        }
-
         private static bool CheckPropertyHasInit(IPropertySymbol propertySymbol)
         {
             return propertySymbol.SetMethod?.IsInitOnly == true;
         }
 
-        private static HashSet<string> GetRequiredProperties(ITypeSymbol initializationType, INamedTypeSymbol requiredType)
+        private static HashSet<string> GetRequiredProperties(
+            ITypeSymbol initializationType,
+            INamedTypeSymbol requiredType)
         {
             bool typeHasRequiredAttribute = RequiredAttributeUtils.TypeIsRequired(initializationType, requiredType);
 
@@ -66,9 +60,7 @@ namespace RequiredPropertyInitAnalyzer
             foreach (var propertySymbol in TypeSymbolUtils.GetProperties(initializationType))
             {
                 bool isRequired = typeHasRequiredAttribute
-                               || RequiredAttributeUtils.PropertyIsRequired(
-                                      propertySymbol,
-                                      requiredType);
+                               || RequiredAttributeUtils.PropertyIsRequired(propertySymbol, requiredType);
 
                 if (isRequired && CheckPropertyHasInit(propertySymbol))
                 {
@@ -85,13 +77,9 @@ namespace RequiredPropertyInitAnalyzer
         {
             foreach (var expressionSyntax in initializer.Expressions)
             {
-                if (expressionSyntax is not AssignmentExpressionSyntax assignment
-                 || (assignment.Kind() != SyntaxKind.SimpleAssignmentExpression))
-                {
-                    continue;
-                }
-
-                if (assignment.Left is IdentifierNameSyntax identifier)
+                if (expressionSyntax is AssignmentExpressionSyntax assignment
+                 && (assignment.Kind() != SyntaxKind.SimpleAssignmentExpression)
+                 && assignment.Left is IdentifierNameSyntax identifier)
                 {
                     string initPropName = identifier.Identifier.ValueText;
 
@@ -102,37 +90,39 @@ namespace RequiredPropertyInitAnalyzer
             return requiredProperties;
         }
 
+        public override void Initialize(AnalysisContext context)
+        {
+            context.ConfigureGeneratedCodeAnalysis(GeneratedCodeAnalysisFlags.None);
+            context.EnableConcurrentExecution();
+
+            context.RegisterSyntaxNodeAction(this.AnalyzeSyntaxNode, SyntaxKind.ObjectInitializerExpression);
+        }
+
         private void AnalyzeSyntaxNode(SyntaxNodeAnalysisContext context)
         {
-            var requiredType = context.Compilation.GetTypeByMetadataName(typeof(RequiredInitAttribute).FullName);
-
-            if (requiredType == null)
-            {
-                return;
-            }
-
+            // Check we're in an Initializer Expression, { a = 1, b = false, c = 'a'}
             if (context.Node is not InitializerExpressionSyntax initializer)
             {
                 return;
             }
 
+            // Check that the expression parent is what we expect
+            // This check only makes sense inside Object Creation, new Foo(),
+            // or inside Simple Assignments, new Foo { Bar = {...} }
             var initializerParent = initializer.Parent;
-            if (initializerParent == null)
+            if (initializerParent?.Kind() is not (SyntaxKind.ObjectCreationExpression or SyntaxKind.SimpleAssignmentExpression))
             {
                 return;
             }
 
-            switch (initializerParent.Kind())
-            {
-                case SyntaxKind.ObjectCreationExpression:
-                case SyntaxKind.SimpleAssignmentExpression:
-                    break;
-                default:
-                    return;
-            }
-
             var initializationType = context.SemanticModel.GetTypeInfo(initializerParent).Type;
             if (initializationType == null)
+            {
+                return;
+            }
+
+            var requiredType = context.Compilation.GetTypeByMetadataName(typeof(RequiredInitAttribute).FullName);
+            if (requiredType == null)
             {
                 return;
             }
@@ -144,7 +134,8 @@ namespace RequiredPropertyInitAnalyzer
             if (uninitializedProperties.Count > 0)
             {
                 string uninitializedPropertiesList = string.Join(", ", uninitializedProperties);
-                context.ReportDiagnostic(Diagnostic.Create(Rule, initializerParent.GetLocation(), uninitializedPropertiesList));
+                context.ReportDiagnostic(
+                    Diagnostic.Create(Rule, initializerParent.GetLocation(), uninitializedPropertiesList));
             }
         }
     }
