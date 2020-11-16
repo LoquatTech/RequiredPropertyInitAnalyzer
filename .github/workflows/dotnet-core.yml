@@ -26,6 +26,9 @@ jobs:
       uses: actions/setup-dotnet@v1
       with:
         dotnet-version: 5.0.100
+        source-url: https://nuget.pkg.github.com/LoquatTech/index.json
+      env:
+        NUGET_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
     - name: Install dependencies
       run: dotnet restore '${{ env.projectPath }}'
@@ -34,7 +37,10 @@ jobs:
       run: dotnet build '${{ env.projectPath }}' --configuration Release --no-restore
 
     - name: Pack
-      run: dotnet pack '${{ env.projectPath }}' --no-restore --configuration Release -o '${{ github.workspace }}\package'
-
+      run: dotnet pack '${{ env.projectPath }}' --no-restore --configuration Release -o '${{ github.workspace }}/package'
+    
+    - name: Push generated package to GitHub registry
+      run: dotnet nuget push '${{ env.projectPath }}/package/*.nupkg' --skip-duplicate --no-symbols true
+      
     #- name: Test
     #  run: dotnet test --no-restore --verbosity normal
