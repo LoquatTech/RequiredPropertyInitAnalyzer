@@ -2,6 +2,7 @@ name: .NET Core
 
 env:
   projectPath: '${{ github.workspace }}/src/RequiredPropertyInitAnalyzer.Package/'
+  packageRepoUrl: 'https://nuget.pkg.github.com/LoquatTech/index.json'
   DOTNET_SKIP_FIRST_TIME_EXPERIENCE: 1
   DOTNET_CLI_TELEMETRY_OPTOUT: 1
   POWERSHELL_TELEMETRY_OPTOUT: 1
@@ -26,9 +27,9 @@ jobs:
       uses: actions/setup-dotnet@v1
       with:
         dotnet-version: 5.0.100
-        source-url: https://nuget.pkg.github.com/LoquatTech/index.json
-      env:
-        NUGET_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      #  source-url: https://nuget.pkg.github.com/LoquatTech/index.json
+      #env:
+      #  NUGET_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
     - name: Install dependencies
       run: dotnet restore '${{ env.projectPath }}'
@@ -40,7 +41,7 @@ jobs:
       run: dotnet pack '${{ env.projectPath }}' --no-restore --configuration Release -o '${{ github.workspace }}/package'
     
     - name: Push generated package to GitHub registry
-      run: dotnet nuget push '${{ github.workspace }}/package/*.nupkg' --skip-duplicate --no-symbols true
+      run: dotnet nuget push '${{ github.workspace }}/package/*.nupkg' -k ${{ secrets.GITHUB_TOKEN }} -s '${{ env.packageRepoUrl }}' --skip-duplicate --no-symbols true
       
     #- name: Test
     #  run: dotnet test --no-restore --verbosity normal
