@@ -40,7 +40,7 @@ jobs:
       run: dotnet pack '${{ env.projectPath }}' --no-restore --configuration Release -o '${{ github.workspace }}/package'
     
     - name: Push generated package to GitHub registry
-      run: dotnet nuget push '${{ env.projectPath }}/package/*.nupkg' --skip-duplicate --no-symbols true
+      run: dotnet nuget push '${{ github.workspace }}/package/*.nupkg' --skip-duplicate --no-symbols true
       
     #- name: Test
     #  run: dotnet test --no-restore --verbosity normal
