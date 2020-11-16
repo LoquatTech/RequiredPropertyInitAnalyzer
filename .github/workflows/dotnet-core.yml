@@ -1,7 +1,10 @@
 name: .NET Core
 
 env:
-  projectPath: '${{ github.workspace }}\src\RequiredPropertyInitAnalyzer.Package\'
+  projectPath: '${{ github.workspace }}/src/RequiredPropertyInitAnalyzer.Package/'
+  DOTNET_SKIP_FIRST_TIME_EXPERIENCE: 1
+  DOTNET_CLI_TELEMETRY_OPTOUT: 1
+  POWERSHELL_TELEMETRY_OPTOUT: 1
 
 on:
   push:
