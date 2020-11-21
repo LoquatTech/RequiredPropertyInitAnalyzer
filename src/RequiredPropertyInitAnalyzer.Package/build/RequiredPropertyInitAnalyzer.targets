@@ -1,7 +1,7 @@
 ﻿<Project>
 
   <PropertyGroup>
-    <RequiredInitAttributePath Condition="'$(RequiredInitAttributePath)' == ''">$(MSBuildThisFileDirectory)RequiredInitAttribute(DefaultLanguageSourceExtension)</RequiredInitAttributePath>
+    <RequiredInitAttributePath Condition="'$(RequiredInitAttributePath)' == ''">$(MSBuildThisFileDirectory)RequiredInitAttribute$(DefaultLanguageSourceExtension)</RequiredInitAttributePath>
 
     <IncludeRequiredAttributes Condition="'$(IncludeRequiredAttributes)' == '' and Exists($(RequiredInitAttributePath))">true</IncludeRequiredAttributes>
   </PropertyGroup>
