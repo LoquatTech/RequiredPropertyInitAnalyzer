@@ -78,7 +78,7 @@ namespace RequiredPropertyInitAnalyzer
             foreach (var expressionSyntax in initializer.Expressions)
             {
                 if (expressionSyntax is AssignmentExpressionSyntax assignment
-                 && (assignment.Kind() != SyntaxKind.SimpleAssignmentExpression)
+                 && (assignment.Kind() == SyntaxKind.SimpleAssignmentExpression)
                  && assignment.Left is IdentifierNameSyntax identifier)
                 {
                     string initPropName = identifier.Identifier.ValueText;

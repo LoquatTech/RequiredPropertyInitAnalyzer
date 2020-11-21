@@ -1,5 +1,5 @@
 ﻿using System.Collections.Generic;
-using LoquatTech.RequiredPropertyInit;
+using LoquatTech;
 
 namespace RequiredPropertyInitTestSolution
 {
@@ -8,9 +8,21 @@ namespace RequiredPropertyInitTestSolution
         unsafe static void Main()
         {
             // Test case
-            var testClassProperties = new TestClassProperties
+            var failedTestClassProperties = new TestClassProperties
             {
                 IntProp = 1,
+                RecursiveProp = new TestClassProperties
+                {
+                    BoolProp = false,
+                    IntProp = 2
+                }
+            };
+
+            var passTestClassProperties = new TestClassProperties
+            {
+                IntProp = 1,
+                StringProp="",
+                BaseRecordProp = new TestRecordProperties(),
                 RecursiveProp = new TestClassProperties
                 {
                     BoolProp = false,
@@ -130,7 +142,7 @@ namespace RequiredPropertyInitTestSolution
 
         public TestRecordProperties UninitTestProp { get; init; }
 
-        [RequiredInit]
+        //[RequiredInit]
         public TestRecordProperties RecursiveProp { get; init; }
     }
 }
