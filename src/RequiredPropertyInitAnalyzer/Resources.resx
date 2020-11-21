@@ -130,7 +130,7 @@
     <comment>The title of the diagnostic.</comment>
   </data>
   <data name="UninitializedPropertySuppressionJustification" xml:space="preserve">
-    <value>Properties symbols marked with RequiredAttribute are set during instance initialization</value>
+    <value>Properties symbols marked with RequiredInitAttribute are set during instance initialization</value>
     <comment>Justification for suppression of the uninitialized non-nullable property marked with Required attribute</comment>
   </data>
 </root>

@@ -88,7 +88,7 @@ namespace RequiredPropertyInitAnalyzer {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Properties symbols marked with RequiredAttribute are set during instance initialization.
+        ///   Looks up a localized string similar to Properties symbols marked with RequiredInitAttribute are set during instance initialization.
         /// </summary>
         internal static string UninitializedPropertySuppressionJustification {
             get {
