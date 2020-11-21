@@ -3,10 +3,10 @@
   <PropertyGroup>
     <RequiredInitAttributePath Condition="'$(RequiredInitAttributePath)' == ''">$(MSBuildThisFileDirectory)RequiredInitAttribute(DefaultLanguageSourceExtension)</RequiredInitAttributePath>
 
-    <IncludeOwnershipAttributes Condition="'$(IncludeOwnershipAttributes)' == '' and Exists($(RequiredInitAttributePath))">true</IncludeOwnershipAttributes>
+    <IncludeRequiredAttributes Condition="'$(IncludeRequiredAttributes)' == '' and Exists($(RequiredInitAttributePath))">true</IncludeRequiredAttributes>
   </PropertyGroup>
 
-  <ItemGroup Condition="'$(IncludeOwnershipAttributes)' == 'true' and Exists($(RequiredInitAttributePath))">
+  <ItemGroup Condition="'$(IncludeRequiredAttributes)' == 'true' and Exists($(RequiredInitAttributePath))">
     <Compile Include="$(RequiredInitAttributePath)" Visible="false" />
 
     
@@ -15,10 +15,10 @@
   </ItemGroup>
 
   <Target Name="OwnershipAttributesRequestedForUnsupportedLanguage"
-          Condition="'$(IncludeOwnershipAttributes)' == 'true' and !Exists($(RequiredInitAttributePath))"
+          Condition="'$(IncludeRequiredAttributes)' == 'true' and !Exists($(RequiredInitAttributePath))"
           BeforeTargets="Compile">
 
-    <Warning Code="IDISP026" Text="The project specifies &lt;IncludeOwnershipAttributes&gt;true&lt;/IncludeOwnershipAttributes&gt;, but including attributes in this language is not yet supported." />
+    <Warning Code="IDISP026" Text="The project specifies &lt;IncludeRequiredAttributes&gt;true&lt;/IncludeRequiredAttributes&gt;, but including attributes in this language is not yet supported." />
   </Target>
 
 </Project>

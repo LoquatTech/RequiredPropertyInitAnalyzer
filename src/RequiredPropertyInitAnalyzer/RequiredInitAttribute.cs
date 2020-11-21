@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace LoquatTech.RequiredPropertyInit
+namespace LoquatTech
 {
     [AttributeUsage(AttributeTargets.Property | AttributeTargets.Class)]
     public class RequiredInitAttribute : Attribute
