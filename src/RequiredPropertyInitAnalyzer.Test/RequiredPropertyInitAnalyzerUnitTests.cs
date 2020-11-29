@@ -2,9 +2,9 @@
 
 using System.Threading.Tasks;
 
-//using VerifyCS = RequiredPropertyInitAnalyzer.Test.CSharpCodeFixVerifier<
-//    RequiredPropertyInitAnalyzer.RequiredPropertyInitAnalyzerAnalyzer,
-//    RequiredPropertyInitAnalyzer.RequiredPropertyInitAnalyzerCodeFixProvider>;
+//using VerifyCS = RequiredPropertyInitSyntaxNodeAnalyzer.Test.CSharpCodeFixVerifier<
+//    RequiredPropertyInitSyntaxNodeAnalyzer.RequiredPropertyInitAnalyzerAnalyzer,
+//    RequiredPropertyInitSyntaxNodeAnalyzer.RequiredPropertyInitAnalyzerCodeFixProvider>;
 
 namespace RequiredPropertyInitAnalyzer.Test
 {
@@ -54,7 +54,7 @@ namespace RequiredPropertyInitAnalyzer.Test
     //    }
     //}";
 
-    //        var expected = VerifyCS.Diagnostic("RequiredPropertyInitAnalyzer").WithLocation(0).WithArguments("TypeName");
+    //        var expected = VerifyCS.Diagnostic("RequiredPropertyInitSyntaxNodeAnalyzer").WithLocation(0).WithArguments("TypeName");
     //        await VerifyCS.VerifyCodeFixAsync(test, expected, fixtest);
     //    }
     }

@@ -32,8 +32,7 @@ namespace RequiredPropertyInitAnalyzer
 
         private static void HandleDiagnostic(
             SuppressionAnalysisContext context,
-            Diagnostic diagnostic,
-            INamedTypeSymbol requiredType)
+            Diagnostic diagnostic)
         {
             var sourceTree = diagnostic.Location.SourceTree;
             if (sourceTree is null)
@@ -62,7 +61,7 @@ namespace RequiredPropertyInitAnalyzer
                 return;
             }
 
-            bool typeHasRequired = RequiredAttributeUtils.TypeIsRequired(declaredType, requiredType);
+            bool typeHasRequired = RequiredAttributeUtils.TypeIsRequired(declaredType);
 
             var property = declaredType.GetMembers()
                                        .OfType<IPropertySymbol>()
@@ -74,7 +73,7 @@ namespace RequiredPropertyInitAnalyzer
                 return;
             }
 
-            if (typeHasRequired || RequiredAttributeUtils.PropertyIsRequired(property, requiredType))
+            if (typeHasRequired || RequiredAttributeUtils.PropertyIsRequired(property))
             {
                 context.ReportSuppression(Suppression.Create(SuppressUninitializedProperty, diagnostic));
             }
@@ -82,16 +81,9 @@ namespace RequiredPropertyInitAnalyzer
 
         public override void ReportSuppressions(SuppressionAnalysisContext context)
         {
-            var requiredType = context.Compilation.GetTypeByMetadataName(typeof(RequiredInitAttribute).FullName);
-
-            if (requiredType == null)
-            {
-                return;
-            }
-
             foreach (var diagnostic in context.ReportedDiagnostics)
             {
-                HandleDiagnostic(context, diagnostic, requiredType);
+                HandleDiagnostic(context, diagnostic);
             }
         }
     }

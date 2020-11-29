@@ -1,12 +1,9 @@
 ﻿using System.Collections.Generic;
 using System.Collections.Immutable;
 
-using LoquatTech;
-
 using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Diagnostics;
+using Microsoft.CodeAnalysis.Operations;
 
 using RequiredPropertyInitAnalyzer.Utils;
 
@@ -33,7 +30,7 @@ namespace RequiredPropertyInitAnalyzer
             Resources.ResourceManager,
             typeof(Resources));
 
-        private static readonly DiagnosticDescriptor Rule = new DiagnosticDescriptor(
+        private static readonly DiagnosticDescriptor Rule = new(
             DiagnosticId,
             Title,
             MessageFormat,
@@ -49,18 +46,16 @@ namespace RequiredPropertyInitAnalyzer
             return propertySymbol.SetMethod?.IsInitOnly == true;
         }
 
-        private static HashSet<string> GetRequiredProperties(
-            ITypeSymbol initializationType,
-            INamedTypeSymbol requiredType)
+        private static HashSet<string> GetRequiredProperties(ITypeSymbol initializationType)
         {
-            bool typeHasRequiredAttribute = RequiredAttributeUtils.TypeIsRequired(initializationType, requiredType);
+            bool typeHasRequiredAttribute = RequiredAttributeUtils.TypeIsRequired(initializationType);
 
             var requiredProperties = new HashSet<string>();
 
             foreach (var propertySymbol in TypeSymbolUtils.GetProperties(initializationType))
             {
                 bool isRequired = typeHasRequiredAttribute
-                               || RequiredAttributeUtils.PropertyIsRequired(propertySymbol, requiredType);
+                               || RequiredAttributeUtils.PropertyIsRequired(propertySymbol);
 
                 if (isRequired && CheckPropertyHasInit(propertySymbol))
                 {
@@ -71,23 +66,22 @@ namespace RequiredPropertyInitAnalyzer
             return requiredProperties;
         }
 
-        private static HashSet<string> GetUninitializedProperties(
-            InitializerExpressionSyntax initializer,
-            HashSet<string> requiredProperties)
+        private static void GetUninitializedProperties(IObjectOrCollectionInitializerOperation initializer, HashSet<string> requiredProperties)
         {
-            foreach (var expressionSyntax in initializer.Expressions)
+            if (initializer?.Initializers is null)
             {
-                if (expressionSyntax is AssignmentExpressionSyntax assignment
-                 && (assignment.Kind() == SyntaxKind.SimpleAssignmentExpression)
-                 && assignment.Left is IdentifierNameSyntax identifier)
+                return;
+            }
+
+            foreach (var operation in initializer.Initializers)
+            {
+                if (operation is ISimpleAssignmentOperation { Target: IPropertyReferenceOperation propertyReference })
                 {
-                    string initPropName = identifier.Identifier.ValueText;
+                    string initPropName = propertyReference.Property.Name;
 
                     requiredProperties.Remove(initPropName);
                 }
             }
-
-            return requiredProperties;
         }
 
         public override void Initialize(AnalysisContext context)
@@ -95,47 +89,26 @@ namespace RequiredPropertyInitAnalyzer
             context.ConfigureGeneratedCodeAnalysis(GeneratedCodeAnalysisFlags.None);
             context.EnableConcurrentExecution();
 
-            context.RegisterSyntaxNodeAction(this.AnalyzeSyntaxNode, SyntaxKind.ObjectInitializerExpression);
+            context.RegisterOperationAction(this.AnalyzeOperation, OperationKind.ObjectCreation);
         }
 
-        private void AnalyzeSyntaxNode(SyntaxNodeAnalysisContext context)
+        private void AnalyzeOperation(OperationAnalysisContext context)
         {
-            // Check we're in an Initializer Expression, { a = 1, b = false, c = 'a'}
-            if (context.Node is not InitializerExpressionSyntax initializer)
+            if (context.Operation is not IObjectCreationOperation creationOperation)
             {
                 return;
             }
 
-            // Check that the expression parent is what we expect
-            // This check only makes sense inside Object Creation, new Foo(),
-            // or inside Simple Assignments, new Foo { Bar = {...} }
-            var initializerParent = initializer.Parent;
-            if (initializerParent?.Kind() is not (SyntaxKind.ObjectCreationExpression or SyntaxKind.SimpleAssignmentExpression))
+            var returnType = creationOperation.Type;
+
+            var requiredProperties = GetRequiredProperties(returnType);
+
+            GetUninitializedProperties(creationOperation.Initializer, requiredProperties);
+
+            if (requiredProperties.Count > 0)
             {
-                return;
-            }
-
-            var initializationType = context.SemanticModel.GetTypeInfo(initializerParent).Type;
-            if (initializationType == null)
-            {
-                return;
-            }
-
-            var requiredType = context.Compilation.GetTypeByMetadataName(typeof(RequiredInitAttribute).FullName);
-            if (requiredType == null)
-            {
-                return;
-            }
-
-            var requiredProperties = GetRequiredProperties(initializationType, requiredType);
-
-            var uninitializedProperties = GetUninitializedProperties(initializer, requiredProperties);
-
-            if (uninitializedProperties.Count > 0)
-            {
-                string uninitializedPropertiesList = string.Join(", ", uninitializedProperties);
-                context.ReportDiagnostic(
-                    Diagnostic.Create(Rule, initializerParent.GetLocation(), uninitializedPropertiesList));
+                string uninitializedPropertiesList = string.Join(", ", requiredProperties);
+                context.ReportDiagnostic(Diagnostic.Create(Rule, creationOperation.Syntax.GetLocation(), uninitializedPropertiesList));
             }
         }
     }

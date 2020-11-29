@@ -3,7 +3,7 @@
 namespace LoquatTech
 {
     [AttributeUsage(AttributeTargets.Property | AttributeTargets.Class)]
-    public class RequiredInitAttribute : Attribute
+    internal class RequiredInitAttribute : Attribute
     {
     }
 }
