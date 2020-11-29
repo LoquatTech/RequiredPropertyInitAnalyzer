@@ -8,7 +8,11 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Include="..\..\src\RequiredPropertyInitAnalyzer\RequiredInitAttribute.cs" Link="RequiredInitAttribute.cs" />
+    <Compile Include="..\..\..\src\RequiredPropertyInitAnalyzer\RequiredInitAttribute.cs" Link="RequiredInitAttribute.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\ClassDefinitionTest\ClassDefinitionTest.csproj" />
   </ItemGroup>
 
 </Project>

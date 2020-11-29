@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using ClassDefinitionTest;
 using LoquatTech;
 
 namespace RequiredPropertyInitTestSolution
@@ -16,6 +17,10 @@ namespace RequiredPropertyInitTestSolution
                     BoolProp = false,
                     IntProp = 2
                 }
+            };
+
+            var testRecordBoolProperty = new TestRecordBoolProperty
+            {
             };
 
             var passTestClassProperties = new TestClassProperties
@@ -50,6 +55,8 @@ namespace RequiredPropertyInitTestSolution
                 }
             };
 
+            TestRequiredRecord testRequiredRecordImplicit = new();
+
             var testRequiredRecord = new TestRequiredRecord
             {
                 IntProp = 2,
@@ -58,6 +65,14 @@ namespace RequiredPropertyInitTestSolution
                     BoolProp = false
                 }
             };
+
+            var test = new DifferentProjectClass
+            {
+                StringProp ="something",
+                BaseRecordProp = new()
+            };
+
+            TestRecordProperties testRecordProperties2 = new();
 
             // Potential issues
             var foo = new Dictionary<int, int> { { 1, 1 } };
@@ -91,6 +106,12 @@ namespace RequiredPropertyInitTestSolution
 
         [RequiredInit]
         public TestRecordProperties BaseRecordProp { get; init; }
+    }
+
+    [RequiredInit]
+    internal record TestRecordBoolProperty
+    {
+        public bool BoolProp { get; init; }
     }
 
     internal record TestRecordProperties
